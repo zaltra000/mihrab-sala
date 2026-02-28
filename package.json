@@ -1,0 +1,37 @@
+{
+    "name": "mihrab",
+    "private": true,
+    "version": "1.0.0",
+    "type": "module",
+    "scripts": {
+        "dev": "vite",
+        "build": "tsc && vite build",
+        "preview": "vite preview"
+    },
+    "dependencies": {
+        "react": "^19.0.0",
+        "react-dom": "^19.0.0",
+        "zustand": "^5.0.0",
+        "adhan": "^4.4.3",
+        "date-fns": "^4.1.0",
+        "lucide-react": "^0.469.0",
+        "motion": "^12.0.0",
+        "recharts": "^2.15.0",
+        "clsx": "^2.1.1",
+        "tailwind-merge": "^3.0.0",
+        "@capacitor/core": "^6.2.0",
+        "@capacitor/cli": "^6.2.0",
+        "@capacitor/geolocation": "^6.0.0",
+        "@capacitor/haptics": "^6.0.0",
+        "@capacitor/local-notifications": "^6.0.0"
+    },
+    "devDependencies": {
+        "vite": "^6.0.0",
+        "@vitejs/plugin-react": "^4.3.0",
+        "@tailwindcss/vite": "^4.0.0",
+        "tailwindcss": "^4.0.0",
+        "typescript": "^5.7.0",
+        "@types/react": "^19.0.0",
+        "@types/react-dom": "^19.0.0"
+    }
+}
