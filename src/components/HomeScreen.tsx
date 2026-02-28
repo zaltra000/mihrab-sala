@@ -4,10 +4,10 @@ import { format, formatDistanceToNowStrict } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { usePrayerStore, PrayerName, CalcMethod } from '../store/usePrayerStore';
 import { Card, CardContent } from './ui/Card';
-import { CheckCircle2, Circle, MapPin, Settings, Bell, BellOff, Moon, ChevronDown } from 'lucide-react';
+import { CheckCircle2, Circle, MapPin, Settings, Bell, BellOff, BellRing, Moon, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Geolocation } from '@capacitor/geolocation';
-import { schedulePrayerNotifications, cancelAllNotifications } from '../services/notificationService';
+import { schedulePrayerNotifications, cancelAllNotifications, testNotification } from '../services/notificationService';
 import { Haptics, ImpactStyle } from '@capacitor/haptics';
 
 const PRAYER_NAMES_AR: Record<PrayerName, string> = {
@@ -274,8 +274,8 @@ export default function HomeScreen() {
                             setIsDropdownOpen(false);
                           }}
                           className={`text-right px-3 py-2.5 text-xs rounded-lg transition-colors ${calculationMethod === key
-                              ? 'bg-emerald-50 text-emerald-700 font-bold'
-                              : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900 font-medium'
+                            ? 'bg-emerald-50 text-emerald-700 font-bold'
+                            : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900 font-medium'
                             }`}
                         >
                           {name}
@@ -290,8 +290,8 @@ export default function HomeScreen() {
             <button
               onClick={toggleNotifications}
               className={`p-2 rounded-xl shadow-sm transition-colors border ${notificationsEnabled
-                  ? 'bg-emerald-50 border-emerald-100 text-emerald-600'
-                  : 'bg-white border-slate-200 text-slate-400 hover:bg-slate-50'
+                ? 'bg-emerald-50 border-emerald-100 text-emerald-600'
+                : 'bg-white border-slate-200 text-slate-400 hover:bg-slate-50'
                 }`}
               title={notificationsEnabled ? 'إيقاف الإشعارات' : 'تفعيل الإشعارات'}
             >
@@ -300,6 +300,14 @@ export default function HomeScreen() {
               ) : (
                 <BellOff className="w-4 h-4" />
               )}
+            </button>
+
+            <button
+              onClick={testNotification}
+              className="p-2 rounded-xl shadow-sm transition-colors border bg-indigo-50 border-indigo-100 text-indigo-600 hover:bg-indigo-100"
+              title="اختبار الإشعار"
+            >
+              <BellRing className="w-4 h-4" />
             </button>
           </div>
         </motion.div>
@@ -314,17 +322,17 @@ export default function HomeScreen() {
         >
           {/* Dynamic Glow based on prayer */}
           <div className={`absolute inset-0 rounded-3xl blur-xl opacity-40 group-hover:opacity-60 transition-opacity duration-500 ${nextPrayer.name === 'الفجر' ? 'bg-gradient-to-r from-indigo-400 to-cyan-500' :
-              nextPrayer.name === 'الظهر' ? 'bg-gradient-to-r from-amber-400 to-orange-500' :
-                nextPrayer.name === 'العصر' ? 'bg-gradient-to-r from-orange-400 to-rose-400' :
-                  nextPrayer.name === 'المغرب' ? 'bg-gradient-to-r from-rose-500 to-purple-600' :
-                    'bg-gradient-to-r from-indigo-600 to-slate-800'
+            nextPrayer.name === 'الظهر' ? 'bg-gradient-to-r from-amber-400 to-orange-500' :
+              nextPrayer.name === 'العصر' ? 'bg-gradient-to-r from-orange-400 to-rose-400' :
+                nextPrayer.name === 'المغرب' ? 'bg-gradient-to-r from-rose-500 to-purple-600' :
+                  'bg-gradient-to-r from-indigo-600 to-slate-800'
             }`} />
 
           <Card className={`text-white border-none shadow-2xl overflow-hidden relative rounded-3xl transition-colors duration-1000 ${nextPrayer.name === 'الفجر' ? 'bg-gradient-to-br from-indigo-500 to-cyan-700' :
-              nextPrayer.name === 'الظهر' ? 'bg-gradient-to-br from-amber-500 to-orange-600' :
-                nextPrayer.name === 'العصر' ? 'bg-gradient-to-br from-orange-500 to-rose-600' :
-                  nextPrayer.name === 'المغرب' ? 'bg-gradient-to-br from-rose-600 to-purple-800' :
-                    'bg-gradient-to-br from-indigo-800 to-slate-900'
+            nextPrayer.name === 'الظهر' ? 'bg-gradient-to-br from-amber-500 to-orange-600' :
+              nextPrayer.name === 'العصر' ? 'bg-gradient-to-br from-orange-500 to-rose-600' :
+                nextPrayer.name === 'المغرب' ? 'bg-gradient-to-br from-rose-600 to-purple-800' :
+                  'bg-gradient-to-br from-indigo-800 to-slate-900'
             }`}>
             {/* Decorative background circles */}
             <div className="absolute top-0 right-0 -mr-16 -mt-16 w-48 h-48 rounded-full bg-white/10 blur-2xl" />
@@ -373,10 +381,10 @@ export default function HomeScreen() {
               >
                 <Card
                   className={`transition-all duration-300 border-transparent shadow-sm rounded-2xl ${isFuture
-                      ? 'bg-slate-50 opacity-60 cursor-not-allowed'
-                      : isCompleted
-                        ? 'bg-emerald-50/80 border-emerald-100 cursor-pointer hover:shadow-md'
-                        : 'bg-white cursor-pointer hover:shadow-md'
+                    ? 'bg-slate-50 opacity-60 cursor-not-allowed'
+                    : isCompleted
+                      ? 'bg-emerald-50/80 border-emerald-100 cursor-pointer hover:shadow-md'
+                      : 'bg-white cursor-pointer hover:shadow-md'
                     }`}
                   onClick={async () => {
                     if (!isFuture) {

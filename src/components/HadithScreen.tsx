@@ -76,29 +76,30 @@ export default function HadithScreen() {
     if (isFriday) {
       targetCategory = 'friday';
       message = 'اليوم جمعة، عيد الأسبوع! إليك هذا الحديث لتغتنم فضله:';
-    } else if (perfectDaysStreak >= 3) {
-      targetCategory = 'prayer_excellence';
-      message = 'ما شاء الله! لاحظت التزامك التام بالصلوات في الأيام الماضية، استمر على هذا النور:';
-    } else if (tasbeehTotal > 500 && tasbeehToday > 50) {
-      targetCategory = 'tasbih_excellence';
-      message = 'لسانك رطب بذكر الله! أداؤك في التسبيح ممتاز اليوم، اقرأ هذا الحديث:';
-    } else if (missedAllYesterday && perfectYesterday) { // This condition is impossible, fixing logic
-      // Fallback
-    } else if (missedAllYesterday && totalPrayersLast7Days > 0) {
-      targetCategory = 'repentance';
-      message = 'لاحظت أنك لم تصلِّ الأمس، باب التوبة مفتوح دائماً، عد إلى ربك:';
     } else if (fajrMissedCount >= 4) {
       targetCategory = 'fajr_struggle';
       message = 'لاحظت أنك تواجه صعوبة في الاستيقاظ لصلاة الفجر مؤخراً، هذا الحديث لك:';
     } else if (ishaMissedCount >= 4) {
       targetCategory = 'isha_struggle';
       message = 'يبدو أن صلاة العشاء تفوتك كثيراً هذه الأيام، تذكر هذا الحديث العظيم:';
-    } else if (totalPrayersLast7Days < 10) {
+    } else if (totalPrayersLast7Days === 0 && Object.keys(logs).length >= 2) {
       targetCategory = 'prayer_abandonment';
-      message = 'صلواتك قليلة جداً مؤخراً، الصلاة هي عماد الدين، اقرأ هذا الحديث بقلبك:';
+      message = 'غيابك طال عن الصلاة.. الصلاة هي الرابط بينك وبين خالقك، اقرأ هذا الحديث بقلبك:';
+    } else if (missedAllYesterday && totalPrayersLast7Days > 0) {
+      targetCategory = 'repentance';
+      message = 'أمس كان يوماً صعباً ولم تصلِّ، لكن باب التوبة مفتوح دائماً:';
+    } else if (perfectDaysStreak >= 3) {
+      targetCategory = 'prayer_excellence';
+      message = 'ما شاء الله! التزامك بالصلوات رائع في الأيام الماضية، استمر على هذا النور:';
+    } else if (tasbeehTotal > 500 && tasbeehToday > 50) {
+      targetCategory = 'tasbih_excellence';
+      message = 'لسانك رطب بذكر الله! أداؤك في التسبيح ممتاز اليوم، اقرأ هذا الحديث:';
     } else if (totalPrayersLast7Days >= 25 && tasbeehToday === 0) {
       targetCategory = 'tasbih_neglect';
       message = 'صلواتك ممتازة! لكنك نسيت التسبيح اليوم، هذا الحديث سيشجعك:';
+    } else if (perfectDaysStreak > 0) {
+      targetCategory = 'consistency';
+      message = 'أنت تحافظ على صلاتك بشكل جيد، تذكر هذا الحديث عن المداومة:';
     } else {
       targetCategory = 'general_motivation';
       message = 'أنت في الطريق الصحيح، إليك حديث اليوم ليزيدك إيماناً وثباتاً:';
@@ -107,12 +108,12 @@ export default function HadithScreen() {
     // 5. Select Hadith
     const eligibleHadiths = hadiths.filter(h => h.category === targetCategory);
 
-    // Use day of year to keep it stable for the day (unless stats change drastically)
-    const dayOfYear = Math.floor(
-      (Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 1000 / 60 / 60 / 24
-    );
+    // Use day of year + category seed to randomize but keep it stable for the day
+    const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 1000 / 60 / 60 / 24);
+    const categorySeed = targetCategory.charCodeAt(0) + targetCategory.charCodeAt(targetCategory.length - 1);
 
-    const selected = eligibleHadiths[dayOfYear % eligibleHadiths.length] || hadiths[0];
+    const selectedIndex = (dayOfYear + categorySeed) % eligibleHadiths.length;
+    const selected = eligibleHadiths[selectedIndex] || hadiths[0];
 
     setDailyHadith(selected);
     setAiMessage(message);

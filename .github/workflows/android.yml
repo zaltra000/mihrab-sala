@@ -41,6 +41,11 @@ jobs:
       - name: Generate App Icons
         run: npx @capacitor/assets generate --android
 
+      - name: Add Custom Notification Sound
+        run: |
+          mkdir -p android/app/src/main/res/raw
+          cp sound/notifications.wav android/app/src/main/res/raw/notifications.wav
+
       - name: Sync Capacitor
         run: npx cap sync android
 

@@ -17,6 +17,18 @@ export const setupNotifications = async () => {
       console.warn('Notification permission denied');
       return false;
     }
+
+    // Create the high-priority channel for Android custom sound
+    await LocalNotifications.createChannel({
+      id: 'prayers_channel',
+      name: 'مواقيت الصلاة',
+      description: 'إشعارات دقيقة لمواقيت الصلاة',
+      sound: 'notifications.wav',
+      importance: 5, // High importance
+      visibility: 1, // Public on lockscreen
+      vibration: true
+    });
+
     return true;
   } catch (e) {
     console.error('Error requesting notification permission', e);
@@ -37,7 +49,7 @@ export const schedulePrayerNotifications = async (lat: number, lng: number, meth
 
     const coords = new Coordinates(lat, lng);
     const params = CalculationMethod[method]();
-    
+
     const notificationsToSchedule = [];
     let notifId = 1;
 
@@ -45,9 +57,9 @@ export const schedulePrayerNotifications = async (lat: number, lng: number, meth
     for (let i = 0; i < 7; i++) {
       const date = new Date();
       date.setDate(date.getDate() + i);
-      
+
       const pTimes = new PrayerTimes(coords, date, params);
-      
+
       const prayers = [
         { id: 'fajr', time: pTimes.fajr },
         { id: 'dhuhr', time: pTimes.dhuhr },
@@ -61,10 +73,10 @@ export const schedulePrayerNotifications = async (lat: number, lng: number, meth
           notificationsToSchedule.push({
             id: notifId++,
             title: `حان الآن موعد صلاة ${PRAYER_NAMES_AR[prayer.id]}`,
-            body: 'ذكر فإن الذكرى تنفع المؤمنين. قم إلى صلاتك يرحمك الله.',
+            body: 'يا باغي الخير أقبل.. حان وقت اللقاء بربك، قم إلى صلاتك 🕌',
             schedule: { at: prayer.time },
-            sound: 'mihrab_alert.wav', // Custom non-musical alert sound (needs to be added to Android res/raw and iOS bundle)
-            smallIcon: 'ic_stat_icon_config_sample', // Default Android icon
+            sound: 'notifications.wav',
+            channelId: 'prayers_channel',
           });
         }
       }
@@ -90,5 +102,29 @@ export const cancelAllNotifications = async () => {
     }
   } catch (error) {
     console.error('Failed to cancel notifications', error);
+  }
+};
+
+export const testNotification = async () => {
+  try {
+    const hasPermission = await setupNotifications();
+    if (!hasPermission) return;
+
+    const testTime = new Date();
+    testTime.setSeconds(testTime.getSeconds() + 3);
+
+    await LocalNotifications.schedule({
+      notifications: [{
+        id: 9999,
+        title: 'تجربة إشعار مِحْرَاب 🕌',
+        body: 'هكذا ستبدو وتُسمع إشعارات الصلاة القادمة. نسأل الله القبول!',
+        schedule: { at: testTime },
+        sound: 'notifications.wav',
+        channelId: 'prayers_channel',
+      }]
+    });
+    console.log('Test notification scheduled in 3 seconds.');
+  } catch (error) {
+    console.error('Failed to schedule test notification', error);
   }
 };

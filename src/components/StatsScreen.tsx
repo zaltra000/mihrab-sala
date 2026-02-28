@@ -1,6 +1,6 @@
 import React, { useMemo, useEffect } from 'react';
 import { usePrayerStore, PrayerName } from '../store/usePrayerStore';
-import { format, subDays, isBefore, startOfDay, parseISO, differenceInDays } from 'date-fns';
+import { format, subDays, startOfDay, parseISO, differenceInDays, getDay } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { Card, CardContent } from './ui/Card';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
@@ -14,6 +14,8 @@ const PRAYER_NAMES_AR: Record<PrayerName, string> = {
   Maghrib: 'المغرب',
   Isha: 'العشاء'
 };
+
+const SHORT_DAYS_AR = ['أحد', 'إثنين', 'ثلاثاء', 'أربعاء', 'خميس', 'جمعة', 'سبت'];
 
 export default function StatsScreen() {
   const { logs } = usePrayerStore();
@@ -35,7 +37,7 @@ export default function StatsScreen() {
       totalCompletedThisWeek += completed;
 
       data.push({
-        name: format(date, 'EEEE', { locale: ar }).replace('يوم ', ''),
+        name: SHORT_DAYS_AR[getDay(date)],
         completed,
         total: 5
       });
@@ -83,7 +85,7 @@ export default function StatsScreen() {
           totalPrayersEver += completedCount;
 
           Object.entries(dayLog).forEach(([prayer, isDone]) => {
-            if (!isDone) missedCounts[prayer as PrayerName]++;
+            if (!isDone && i > 0) missedCounts[prayer as PrayerName]++;
           });
 
           if (completedCount === 5) {
@@ -97,8 +99,10 @@ export default function StatsScreen() {
             tempStreak = 0;
           }
         } else {
-          // Missing log means missed prayers
-          Object.keys(missedCounts).forEach(p => missedCounts[p as PrayerName]++);
+          // Missing log means missed prayers (only count past days)
+          if (i > 0) {
+            Object.keys(missedCounts).forEach(p => missedCounts[p as PrayerName]++);
+          }
           tempStreak = 0;
         }
       }
