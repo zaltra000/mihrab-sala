@@ -16,28 +16,24 @@ const PRAYER_NAMES_AR: Record<PrayerName, string> = {
 };
 
 export default function StatsScreen() {
-  const { logs, seedData } = usePrayerStore();
-
-  useEffect(() => {
-    seedData();
-  }, [seedData]);
+  const { logs } = usePrayerStore();
 
   const stats = useMemo(() => {
     const data = [];
     let totalCompletedThisWeek = 0;
-    
+
     // 1. Weekly Chart Data
     for (let i = 6; i >= 0; i--) {
       const date = subDays(new Date(), i);
       const dateStr = format(date, 'yyyy-MM-dd');
       const dayLog = logs[dateStr];
-      
+
       let completed = 0;
       if (dayLog) {
         completed = Object.values(dayLog).filter(Boolean).length;
       }
       totalCompletedThisWeek += completed;
-      
+
       data.push({
         name: format(date, 'EEEE', { locale: ar }).replace('يوم ', ''),
         completed,
@@ -53,7 +49,7 @@ export default function StatsScreen() {
     let totalDaysLogged = 0;
 
     const sortedDates = Object.keys(logs).sort((a, b) => b.localeCompare(a)); // Newest first
-    
+
     let tempStreak = 0;
     let isCurrentStreakActive = true;
     const todayStr = format(new Date(), 'yyyy-MM-dd');
@@ -64,14 +60,14 @@ export default function StatsScreen() {
       // Check if current streak is broken (didn't complete 5 yesterday or today)
       const todayCompleted = logs[todayStr] ? Object.values(logs[todayStr]).filter(Boolean).length : 0;
       const yesterdayCompleted = logs[yesterdayStr] ? Object.values(logs[yesterdayStr]).filter(Boolean).length : 0;
-      
+
       if (todayCompleted < 5 && yesterdayCompleted < 5) {
         isCurrentStreakActive = false;
       }
 
       // Calculate historical streaks
       let currentDateObj = startOfDay(new Date());
-      
+
       // We need to iterate through all past days to find the best streak
       const oldestDateStr = sortedDates[sortedDates.length - 1];
       const oldestDate = parseISO(oldestDateStr);
@@ -80,12 +76,12 @@ export default function StatsScreen() {
       for (let i = 0; i <= daysDiff; i++) {
         const dStr = format(subDays(currentDateObj, i), 'yyyy-MM-dd');
         const dayLog = logs[dStr];
-        
+
         if (dayLog) {
           totalDaysLogged++;
           const completedCount = Object.values(dayLog).filter(Boolean).length;
           totalPrayersEver += completedCount;
-          
+
           Object.entries(dayLog).forEach(([prayer, isDone]) => {
             if (!isDone) missedCounts[prayer as PrayerName]++;
           });
@@ -131,15 +127,15 @@ export default function StatsScreen() {
   }, [logs]);
 
   return (
-    <div className="flex flex-col min-h-full pt-8 px-5 pb-8">
+    <div className="flex flex-col min-h-full pt-8 px-5 pb-28">
       <header className="mb-8 text-center">
-        <motion.h1 
+        <motion.h1
           initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
           className="text-3xl font-extrabold text-slate-900 tracking-tight"
         >
           إحصائياتي
         </motion.h1>
-        <motion.p 
+        <motion.p
           initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.1 }}
           className="text-slate-500 text-sm mt-2 font-medium"
         >
@@ -205,9 +201,9 @@ export default function StatsScreen() {
         </motion.div>
       </div>
 
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }} 
-        animate={{ opacity: 1, y: 0 }} 
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
         transition={{ type: "spring", delay: 0.5 }}
       >
         <Card className="border-none shadow-sm rounded-3xl bg-white overflow-hidden">
@@ -226,23 +222,27 @@ export default function StatsScreen() {
             <div className="h-64 w-full" dir="ltr">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={stats.chartData} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
-                  <XAxis 
-                    dataKey="name" 
+                  <XAxis
+                    dataKey="name"
                     axisLine={false}
                     tickLine={false}
                     tick={{ fontSize: 13, fill: '#64748b', fontWeight: 600 }}
                     dy={10}
                   />
-                  <YAxis 
+                  <YAxis
                     axisLine={false}
                     tickLine={false}
                     tick={{ fontSize: 12, fill: '#94a3b8' }}
                     domain={[0, 5]}
                     ticks={[0, 1, 2, 3, 4, 5]}
                   />
-                  <Tooltip 
+                  <Tooltip
                     cursor={{ fill: '#f8fafc' }}
-                    contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)', fontWeight: 'bold' }}
+                    wrapperStyle={{ zIndex: 100 }}
+                    contentStyle={{ borderRadius: '12px', padding: '4px 8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)', fontWeight: 'bold', fontSize: '11px', backgroundColor: 'rgba(255, 255, 255, 0.95)' }}
+                    itemStyle={{ padding: 0, margin: 0, fontSize: '12px' }}
+                    labelStyle={{ display: 'none' }}
+                    formatter={(value: number) => [`${value} صلوات`, '']}
                   />
                   <Bar dataKey="completed" radius={[6, 6, 6, 6]} maxBarSize={32}>
                     {stats.chartData.map((entry, index) => (
